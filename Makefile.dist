@@ -1,0 +1,37 @@
+#!/bin/bash
+
+DOCKER_REDIS = redis
+
+help: ## Show this help message
+	@echo 'usage: make [target]'
+	@echo
+	@echo 'targets:'
+	@egrep '^(.+)\:\ ##\ (.+)' ${MAKEFILE_LIST} | column -t -c 2 -s ':#'
+
+run: ## Start the Redis container
+	docker rm ${DOCKER_REDIS} || true
+	docker run -d \
+		--name=${DOCKER_REDIS} \
+		-p 6379:6379 \
+		-p 8001:8001 \
+		-v `pwd`/data:/data \
+		--restart=on-failure \
+		redis/redis-stack:latest
+
+stop: ## Stop the Redis container
+	docker stop ${DOCKER_REDIS}
+
+restart: ## Restart the Redis container
+	docker restart ${DOCKER_REDIS}
+
+redis-cli: ## Connecting to the Redis instance via redis-cli
+	docker exec -it ${DOCKER_REDIS} redis-cli
+
+ssh-redis: ## SSH into the Redis container
+	docker exec -it ${DOCKER_REDIS} bash
+
+ssh-redis-root: ## SSH into the Redis container as root
+	docker exec -it -u root ${DOCKER_REDIS} bash
+
+logs-redis: ## Show logs of the Redis container (with --follow option set)
+	docker logs --follow ${DOCKER_REDIS}

@@ -1,0 +1,7 @@
+###> IDE stuff ###
+.vscode
+###< IDE stuff ###
+
+###> Docker stuff ###
+Makefile
+###< Docker stuff ###
