@@ -23,9 +23,16 @@ ssh-redis-root        SSH into the Redis container as root
 logs-redis            Show logs of the Redis container (with --follow option set)
 ```
 
-Podemos personalizar los argumentos de `docker run` para adecuarlos a nuestras necesidades; los valores por defecto se detallan en el siguiente apartado.
+Podemos personalizar los argumentos de `docker run` para adecuarlos a nuestras necesidades; dichos valores se indican en un fichero `.env` que se invoca desde el `Makefile`:
 
-Con todo preparado, podremos lanzar la creación del contenedor:
+* `REDIS_IMAGE` → Nombre de la imagen de _Redis_ a emplear para construir el contenedor (por defecto, `redis/redis-stack`).
+* `REDIS_NAME` → Nombre del contenedor (por defecto, `redis`).
+* `REDIS_PORT` → Puerto de la instancia de _Redis_ (por defecto, `6379`).
+* `REDISINSIGHT_PORT` → Puerto usado por el _RedisInsight_ de administración (por defecto, `8001`).
+
+Con todo preparado, podremos lanzar la creación del contenedor.
+
+¡Adelante las rotativas!
 
 ```shell
 ❯ make run
@@ -36,6 +43,7 @@ docker run -d \
         -p 6379:6379 \
         -p 8001:8001 \
         -v `pwd`/data:/data \
+        --restart=on-failure \
         redis/redis-stack:latest
 Unable to find image 'redis/redis-stack:latest' locally
 latest: Pulling from redis/redis-stack
@@ -60,7 +68,7 @@ Status: Downloaded newer image for redis/redis-stack:latest
 d40624272b65e1c8d0115d22fbef584912bd2b9799f4ffd0264e04dd8d55e746
 ```
 
-¡Adelante las rotativas!
+Vamos echando un ojo al proceso de creación y arranque:
 
 ```shell
 ❯ make logs-redis
@@ -104,8 +112,6 @@ docker logs --follow redis
 9:M 03 Oct 2022 11:11:47.240 * <bf> RedisBloom version 2.2.18 (Git=8b6ee3b)
 9:M 03 Oct 2022 11:11:47.240 * Module 'bf' loaded from /opt/redis-stack/lib/redisbloom.so
 9:M 03 Oct 2022 11:11:47.240 * Ready to accept connections
-
-
 ```
 
 Probamos la conexión con el [redis-cli](https://redis.io/docs/manual/cli/) incluido en nuestro contenedor:
@@ -120,12 +126,4 @@ PONG
 
 Recordad que también tenemos disponible _RedisInsight_ ─si no hemos tocado la imagen por defecto, claro─, y podremos cargar el GUI en la URL `http://localhost:8001/`:
 
-![Empty RedisInsight](./doc/redisinsigth-empty.png?raw=true "redisinsigth-empty")
-
-## Valores por defecto
-
-* Nombre del contenedor → `redis`
-* Puerto de la instancia de Redis → `6379`
-* Puerto de _RedisInsight_ → `8001`
-* Persistencia de datos → Directorio `data`
-* Política de reinicio del contenedor → `on-failure`
+![Empty RedisInsight](./doc/redisinsigth-out-of-the-box.png?raw=true "RedisInsigth out of the box")

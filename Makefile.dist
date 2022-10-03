@@ -1,6 +1,7 @@
 #!/bin/bash
 
-DOCKER_REDIS = redis
+CONFIG = .env
+include ${CONFIG}
 
 help: ## Show this help message
 	@echo 'usage: make [target]'
@@ -9,29 +10,29 @@ help: ## Show this help message
 	@egrep '^(.+)\:\ ##\ (.+)' ${MAKEFILE_LIST} | column -t -c 2 -s ':#'
 
 run: ## Start the Redis container
-	docker rm ${DOCKER_REDIS} || true
+	docker rm $(REDIS_NAME) || true
 	docker run -d \
-		--name=${DOCKER_REDIS} \
-		-p 6379:6379 \
-		-p 8001:8001 \
+		--name=$(REDIS_NAME) \
+		-p $(REDIS_PORT):6379 \
+		-p $(REDISINSIGHT_PORT):8001 \
 		-v `pwd`/data:/data \
-		--restart=on-failure \
-		redis/redis-stack:latest
+		--restart=$(REDIS_RESTART) \
+		$(REDIS_IMAGE)
 
 stop: ## Stop the Redis container
-	docker stop ${DOCKER_REDIS}
+	docker stop $(REDIS_NAME)
 
 restart: ## Restart the Redis container
-	docker restart ${DOCKER_REDIS}
+	docker restart $(REDIS_NAME)
 
 redis-cli: ## Connecting to the Redis instance via redis-cli
-	docker exec -it ${DOCKER_REDIS} redis-cli
+	docker exec -it $(REDIS_NAME) redis-cli
 
 ssh-redis: ## SSH into the Redis container
-	docker exec -it ${DOCKER_REDIS} bash
+	docker exec -it $(REDIS_NAME) bash
 
 ssh-redis-root: ## SSH into the Redis container as root
-	docker exec -it -u root ${DOCKER_REDIS} bash
+	docker exec -it -u root $(REDIS_NAME) bash
 
 logs-redis: ## Show logs of the Redis container (with --follow option set)
-	docker logs --follow ${DOCKER_REDIS}
+	docker logs --follow $(REDIS_NAME)

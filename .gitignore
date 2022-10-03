@@ -3,5 +3,6 @@
 ###< IDE stuff ###
 
 ###> Docker stuff ###
+.env
 Makefile
 ###< Docker stuff ###
